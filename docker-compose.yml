@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - dados:/data          # banco de dados: não apague este volume
+    restart: unless-stopped
+
+volumes:
+  dados:
