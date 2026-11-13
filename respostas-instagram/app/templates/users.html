@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Usuários</h1>
+<table class="table">
+  <thead><tr><th>E-mail</th><th>Perfil</th><th>Prefeitura</th><th></th></tr></thead>
+  <tbody>
+  {% for u in rows %}
+    <tr><td>{{ u.email }}</td><td>{{ 'Administrador' if u.role == 'admin' else 'Equipe da prefeitura' }}</td><td>{{ u.mun_name or '—' }}</td>
+      <td>{% if u.id != user.id %}
+        <form method="post" action="{{ url_for('panel.user_delete', uid=u.id) }}" class="inline">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="danger" type="submit">Excluir</button></form>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<section class="card narrow">
+  <h2>Novo usuário</h2>
+  <p class="muted">"Equipe da prefeitura" enxerga e gerencia apenas a própria prefeitura.</p>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>E-mail <input type="email" name="email" required></label>
+    <label>Senha inicial (mínimo 10 caracteres) <input type="password" name="password" minlength="10" autocomplete="new-password" required></label>
+    <label>Perfil
+      <select name="role"><option value="prefeitura">Equipe da prefeitura</option><option value="admin">Administrador</option></select></label>
+    <label>Prefeitura (para equipe da prefeitura)
+      <select name="municipality_id"><option value="">—</option>
+        {% for m in muns %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}</select></label>
+    <button type="submit">Criar usuário</button>
+  </form>
+</section>
+{% endblock %}

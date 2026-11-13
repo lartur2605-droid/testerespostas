@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_tabs.html" %}
+{% if not mun.access_token_enc %}
+  <div class="flash erro">Esta prefeitura ainda não tem token do Instagram. Sem ele o sistema não consegue responder.
+    {% if user.role == 'admin' %}<a href="{{ url_for('panel.config', mid=mun.id) }}">Cadastrar token</a>{% endif %}</div>
+{% elif token_age is not none and token_age >= 50 %}
+  <div class="flash erro">O token do Instagram foi renovado há {{ token_age }} dias e está perto de vencer (limite: 60). Peça ao administrador para gerar um novo.</div>
+{% endif %}
+<div class="stats">
+  <div class="card stat"><span class="num">{{ stats.pendentes }}</span><span>aguardando a equipe</span></div>
+  <div class="card stat"><span class="num">{{ stats.respondidos_7d }}</span><span>respondidos nos últimos 7 dias</span></div>
+  <div class="card stat"><span class="num">{{ stats.total }}</span><span>comentários recebidos</span></div>
+</div>
+{% if stats.pendentes %}<p><a class="button" href="{{ url_for('panel.queue', mid=mun.id) }}">Ver fila da equipe</a></p>{% endif %}
+<h2>Últimos comentários</h2>
+{% if not recent %}<p class="muted">Nenhum comentário recebido ainda.</p>{% else %}
+<table class="table">
+  <thead><tr><th>Quando</th><th>Quem</th><th>Comentário</th><th>Situação</th></tr></thead>
+  <tbody>
+  {% for c in recent %}
+    <tr><td>{{ c.received_at|localtime }}</td><td>@{{ c.from_username }}</td><td>{{ c.text }}</td>
+        <td><span class="badge b-{{ c.status }}">{{ STATUS_LABELS.get(c.status, c.status) }}</span></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

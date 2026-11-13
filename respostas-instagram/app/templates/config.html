@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_tabs.html" %}
+<section class="card">
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    {% if user.role == 'admin' %}
+      <label>Nome da prefeitura <input name="name" maxlength="120" value="{{ mun.name }}" required></label>
+      <label>@ do Instagram (sem o @) <input name="ig_username" maxlength="60" value="{{ mun.ig_username }}"></label>
+      <label>ID numérico da conta do Instagram <input name="ig_account_id" pattern="\d{5,30}" value="{{ mun.ig_account_id }}" required></label>
+      <label>Novo token de acesso do Instagram
+        <input name="token" type="password" autocomplete="off" placeholder="{{ 'Token cadastrado (deixe em branco para manter)' if mun.access_token_enc else 'Nenhum token cadastrado' }}">
+        <span class="hint">Guardado criptografado e nunca exibido. Use o token de longa duração gerado no painel da Meta.</span></label>
+      <label>Limite de respostas por hora
+        <input name="max_replies_per_hour" type="number" min="1" max="500" value="{{ mun.max_replies_per_hour }}"></label>
+      <label class="check"><input type="checkbox" name="ai_enabled" value="1" {{ 'checked' if mun.ai_enabled }} {{ '' if ai_available else 'disabled' }}>
+        Usar IA para escolher entre as respostas aprovadas quando nenhuma palavra-chave casar
+        <span class="hint">{{ 'A IA só escolhe uma resposta já cadastrada; nunca escreve texto novo.' if ai_available else 'Indisponível: o servidor não tem ANTHROPIC_API_KEY configurada.' }}</span></label>
+      <label class="check"><input type="checkbox" name="active" value="1" {{ 'checked' if mun.active }}> Prefeitura ativa (desmarque para pausar todas as respostas automáticas)</label>
+    {% endif %}
+    <label>Contato oficial (substitui {contato} nas respostas)
+      <input name="contact_text" maxlength="300" value="{{ mun.contact_text }}"></label>
+    <label>Assuntos extras que sempre vão para a equipe (separados por vírgula; use * no fim para pegar variações)
+      <textarea name="extra_sensitive_keywords" rows="3" maxlength="2000">{{ mun.extra_sensitive_keywords }}</textarea></label>
+    <button type="submit">Salvar</button>
+  </form>
+</section>
+<section class="card">
+  <h2>Assuntos que sempre vão para a equipe</h2>
+  <p class="muted">Comentários com qualquer um destes termos nunca recebem resposta automática. Também vão para a equipe os que trazem CPF, telefone ou e-mail.</p>
+  <p>{% for k in sensitive_defaults %}<span class="chip">{{ k }}</span> {% endfor %}</p>
+</section>
+{% endblock %}

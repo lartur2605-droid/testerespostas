@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_tabs.html" %}
+<nav class="filters">
+  <a class="{{ 'active' if not status }}" href="{{ url_for('panel.history', mid=mun.id) }}">Todos</a>
+  {% for key, label in STATUS_LABELS.items() %}
+    <a class="{{ 'active' if status == key }}" href="{{ url_for('panel.history', mid=mun.id, status=key) }}">{{ label }}</a>
+  {% endfor %}
+</nav>
+{% if not rows %}<p class="muted">Nada por aqui.</p>{% else %}
+<table class="table">
+  <thead><tr><th>Quando</th><th>Quem</th><th>Comentário</th><th>Resposta enviada</th><th>Situação</th></tr></thead>
+  <tbody>
+  {% for c in rows %}
+    <tr>
+      <td>{{ c.received_at|localtime }}</td>
+      <td>@{{ c.from_username }}</td>
+      <td>{{ c.text }}</td>
+      <td>{{ c.reply_text if c.status == 'respondido' else '' }}{% if c.handled_by %}<br><span class="hint">por {{ c.handled_by }}</span>{% endif %}</td>
+      <td><span class="badge b-{{ c.status }}">{{ STATUS_LABELS.get(c.status, c.status) }}</span><br><span class="hint">{{ c.reason }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+<p class="pager">
+  {% if page > 1 %}<a href="{{ url_for('panel.history', mid=mun.id, status=status, page=page-1) }}">← Mais recentes</a>{% endif %}
+  {% if has_next %}<a href="{{ url_for('panel.history', mid=mun.id, status=status, page=page+1) }}">Mais antigos →</a>{% endif %}
+</p>
+{% endblock %}

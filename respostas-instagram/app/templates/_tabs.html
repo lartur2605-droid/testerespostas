@@ -1,0 +1,8 @@
+<h1>{{ mun.name }}{% if not mun.active %} <span class="badge b-erro">Desativada</span>{% endif %}</h1>
+<nav class="tabs">
+  <a class="{{ 'active' if tab == 'resumo' }}" href="{{ url_for('panel.overview', mid=mun.id) }}">Resumo</a>
+  <a class="{{ 'active' if tab == 'fila' }}" href="{{ url_for('panel.queue', mid=mun.id) }}">Fila da equipe</a>
+  <a class="{{ 'active' if tab == 'regras' }}" href="{{ url_for('panel.rules', mid=mun.id) }}">Respostas</a>
+  <a class="{{ 'active' if tab == 'historico' }}" href="{{ url_for('panel.history', mid=mun.id) }}">Histórico</a>
+  <a class="{{ 'active' if tab == 'config' }}" href="{{ url_for('panel.config', mid=mun.id) }}">Configurações</a>
+</nav>

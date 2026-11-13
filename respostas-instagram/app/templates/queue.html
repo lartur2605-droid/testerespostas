@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_tabs.html" %}
+<p class="muted">Comentários que o sistema não respondeu sozinho: assuntos sensíveis, dados pessoais, dúvidas sem resposta aprovada, limite por hora ou erro de envio. A resposta é publicada no Instagram em nome da prefeitura.</p>
+{% if not items %}<p class="card">Nada aguardando. 🎉</p>{% endif %}
+{% for c in items %}
+<article class="card">
+  <p class="meta">{{ c.received_at|localtime }} · <strong>@{{ c.from_username }}</strong>
+    <span class="badge b-{{ c.status }}">{{ STATUS_LABELS.get(c.status, c.status) }}</span></p>
+  <blockquote>{{ c.text }}</blockquote>
+  <p class="hint">Motivo: {{ c.reason }}</p>
+  <form method="post" action="{{ url_for('panel.comment_reply', cid=c.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Resposta <textarea name="text" rows="3" maxlength="2200" required>{{ c.reply_text or '' }}</textarea></label>
+    <button type="submit">Responder no Instagram</button>
+  </form>
+  <form method="post" action="{{ url_for('panel.comment_ignore', cid=c.id) }}" class="inline">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button type="submit" class="secondary">Tratado sem responder</button>
+  </form>
+</article>
+{% endfor %}
+{% endblock %}

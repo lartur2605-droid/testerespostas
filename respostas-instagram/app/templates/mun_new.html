@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h1>Cadastrar prefeitura</h1>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Nome da prefeitura <input name="name" maxlength="120" required></label>
+    <label>@ do Instagram (sem o @)
+      <input name="ig_username" maxlength="60">
+      <span class="hint">Usado para o sistema nunca responder a própria conta.</span></label>
+    <label>ID numérico da conta do Instagram
+      <input name="ig_account_id" inputmode="numeric" pattern="\d{5,30}" required>
+      <span class="hint">Aparece no painel da Meta, na configuração do Instagram do seu app.</span></label>
+    <label>Token de acesso do Instagram (opcional agora)
+      <input name="token" type="password" autocomplete="off">
+      <span class="hint">Guardado criptografado e nunca mais exibido.</span></label>
+    <label>Limite de respostas por hora
+      <input name="max_replies_per_hour" type="number" min="1" max="500" value="{{ default_limit }}"></label>
+    <label>Contato oficial (usado onde a resposta tiver {contato})
+      <input name="contact_text" maxlength="300" placeholder="Ex.: Ouvidoria: 156 ou ouvidoria@cidade.gov.br"></label>
+    <button type="submit">Cadastrar</button>
+  </form>
+</section>
+{% endblock %}

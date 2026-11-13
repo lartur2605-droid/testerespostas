@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_tabs.html" %}
+
+<section class="card">
+  <h2>Testar um comentário</h2>
+  <p class="muted">Veja o que o sistema faria, sem enviar nada ao Instagram.</p>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="testar">
+    <label>Comentário de exemplo <textarea name="text" rows="2" maxlength="2200" required>{{ test.text if test }}</textarea></label>
+    <button type="submit">Testar</button>
+  </form>
+  {% if test %}
+    <div class="result">
+      {% set d = test.decision %}
+      {% if d.action == 'reply' %}<p><span class="badge b-respondido">Responderia</span> {{ d.reason }}</p><blockquote>{{ d.reply_text }}</blockquote>
+      {% elif d.action == 'queue' %}<p><span class="badge b-fila">Iria para a equipe</span> {{ d.reason }}</p>
+      {% else %}<p><span class="badge b-ignorado">Ignoraria</span> {{ d.reason }}</p>{% endif %}
+      <p class="hint">O teste usa só as palavras-chave; a IA (se ativada) não é consultada aqui.</p>
+    </div>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Nova resposta aprovada</h2>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Nome (só para organização) <input name="name" maxlength="120" required placeholder="Ex.: Horário do posto de saúde"></label>
+    <label>Palavras-chave (separadas por vírgula; * no fim pega variações)
+      <input name="keywords" maxlength="1000" required placeholder="Ex.: horario, posto, ubs, vacin*">
+      <span class="hint">Não diferencia maiúsculas nem acentos. "vacin*" casa com vacina, vacinação, vacinar...</span></label>
+    <label>Respostas (uma variação por linha; o sistema sorteia uma para não repetir sempre o mesmo texto)
+      <textarea name="responses" rows="4" required placeholder="Olá, {usuario}! O posto funciona de segunda a sexta, das 7h às 17h. Mais informações: {contato}"></textarea>
+      <span class="hint">{usuario} vira o @ de quem comentou. {contato} vira o contato oficial da prefeitura.</span></label>
+    <label>Prioridade (menor número é testado primeiro) <input name="priority" type="number" min="1" max="9999" value="100"></label>
+    <button type="submit">Criar resposta</button>
+  </form>
+</section>
+
+<h2>Respostas cadastradas</h2>
+{% if not rules %}<p class="muted">Nenhuma ainda. Sem respostas cadastradas, todos os comentários vão para a fila da equipe.</p>{% endif %}
+{% for r in rules %}
+<details class="card rule">
+  <summary><strong>{{ r.name }}</strong>
+    {% if not r.active %}<span class="badge b-ignorado">Pausada</span>{% endif %}
+    <span class="muted">· {{ r.keywords }}</span></summary>
+  <form method="post" action="{{ url_for('panel.rule_edit', rid=r.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label>Nome <input name="name" maxlength="120" value="{{ r.name }}" required></label>
+    <label>Palavras-chave <input name="keywords" maxlength="1000" value="{{ r.keywords }}" required></label>
+    <label>Respostas (uma por linha) <textarea name="responses" rows="4" required>{{ r.responses }}</textarea></label>
+    <label>Prioridade <input name="priority" type="number" min="1" max="9999" value="{{ r.priority }}"></label>
+    <input type="hidden" name="active" value="0">
+    <label class="check"><input type="checkbox" name="active" value="1" {{ 'checked' if r.active }}> Ativa</label>
+    <button type="submit">Salvar alterações</button>
+  </form>
+  <form method="post" action="{{ url_for('panel.rule_delete', rid=r.id) }}" class="inline">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button type="submit" class="danger">Excluir esta resposta</button>
+  </form>
+</details>
+{% endfor %}
+{% endblock %}

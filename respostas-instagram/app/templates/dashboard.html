@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row-between">
+  <h1>Prefeituras</h1>
+  <a class="button" href="{{ url_for('panel.new_mun') }}">Cadastrar prefeitura</a>
+</div>
+{% if not muns %}
+  <p class="card">Nenhuma prefeitura cadastrada ainda. Clique em <strong>Cadastrar prefeitura</strong> para começar.</p>
+{% else %}
+<table class="table">
+  <thead><tr><th>Prefeitura</th><th>Instagram</th><th>Aguardando equipe</th><th>Respondidos (7 dias)</th><th>Situação</th></tr></thead>
+  <tbody>
+  {% for m in muns %}
+    <tr>
+      <td><a href="{{ url_for('panel.overview', mid=m.id) }}">{{ m.name }}</a></td>
+      <td>{% if m.ig_username %}@{{ m.ig_username }}{% else %}<span class="muted">{{ m.ig_account_id }}</span>{% endif %}</td>
+      <td>{% if stats[m.id].pendentes %}<span class="badge b-fila">{{ stats[m.id].pendentes }}</span>{% else %}0{% endif %}</td>
+      <td>{{ stats[m.id].respondidos_7d }}</td>
+      <td>{% if not m.active %}<span class="badge b-erro">Desativada</span>
+          {% elif not m.access_token_enc %}<span class="badge b-fila">Sem token</span>
+          {% else %}<span class="badge b-respondido">Ativa</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}
